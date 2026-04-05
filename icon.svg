@@ -46,4 +46,11 @@ c33 -31 94 -38 141 -15 88 41 102 212 24 278 -43 37 -115 36 -158 0 l-31 -26
 <path d="M5780 2065 c0 -131 2 -155 15 -155 13 0 15 24 15 155 0 131 -2 155
 -15 155 -13 0 -15 -24 -15 -155z"/>
 </g>
+
+<!-- White text "Co" in upper part -->
+<text x="5120" y="4500" font-family="Arial, sans-serif" font-size="2800" font-weight="bold" fill="#ffffff" text-anchor="middle">Co</text>
+
+<!-- Green text "Split" in lower part -->
+<text x="5120" y="7500" font-family="Arial, sans-serif" font-size="2800" font-weight="bold" fill="#4a5f56" text-anchor="middle">Split</text>
+
 </svg>
