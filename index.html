@@ -353,6 +353,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
     gap: 6px 8px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
@@ -734,7 +735,7 @@
   let people = [];
   let expenses = [];
   let colorCounter = 0;
-  let reimbursementMode = 'minimal'; // 'minimal' or 'classic'
+  let reimbursementMode = 'minimal'; // 'minimal' or 'classic' - default is minimal
 
   function applyI18n() {
     document.documentElement.lang = uiLocale;
@@ -935,13 +936,17 @@
         const item = document.createElement('div');
         item.className = 'payment-item';
         item.innerHTML = `
-          <div class="p-avatar" style="background:${fromBg};color:${fromFg}">${initials(t.from.name)}</div>
-          <span class="p-name">${t.from.name}</span>
-          <span class="p-arrow">→</span>
-          <span class="p-amount">${formatMoney(t.amount)}</span>
-          <span class="p-to">${L.toWord}</span>
-          <div class="to-avatar" style="background:${toBg};color:${toFg}">${initials(t.to.name)}</div>
-          <span class="p-to-name">${t.to.name}</span>
+          <div style="display: flex; align-items: center; gap: 6px 8px;">
+            <div class="p-avatar" style="background:${fromBg};color:${fromFg}">${initials(t.from.name)}</div>
+            <span class="p-name">${t.from.name}</span>
+            <span class="p-arrow">→</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px 8px;">
+            <span class="p-amount">${formatMoney(t.amount)}</span>
+            <span class="p-to">${L.toWord}</span>
+            <div class="to-avatar" style="background:${toBg};color:${toFg}">${initials(t.to.name)}</div>
+            <span class="p-to-name">${t.to.name}</span>
+          </div>
         `;
         listEl.appendChild(item);
       });
