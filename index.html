@@ -3,12 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="CoSplit">
-<meta name="theme-color" content="#4a5f56">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon.svg">
 <title>CoSplit</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -418,28 +412,6 @@
     color: var(--accent);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
-
-  /* PWA install hint */
-  .install-hint {
-    background: var(--accent-light);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    font-size: 0.78rem;
-    color: var(--accent-text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .install-hint button {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1rem;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
 </style>
 </head>
 <body>
@@ -453,11 +425,6 @@
 </div>
 
 <div class="scroll-area">
-
-  <div class="install-hint" id="install-hint" style="display:none">
-    <span data-i18n="installHint"></span>
-    <button type="button" onclick="document.getElementById('install-hint').style.display='none'">×</button>
-  </div>
 
   <!-- STEP 1: PERSONE -->
   <div class="card">
@@ -498,9 +465,6 @@
 </div>
 
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
 
   const TRANSLATIONS = {
     en: {
@@ -749,10 +713,6 @@
   }
 
   applyI18n();
-
-  if (window.navigator.standalone !== true) {
-    document.getElementById('install-hint').style.display = 'flex';
-  }
 
   const COLORS = [
     ['#e2eae5','#2a3b33'], ['#d8f3dc','#1b4332'], ['#e8f4fd','#0a3d62'],
