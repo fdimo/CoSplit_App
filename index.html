@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CoSplit">
+<meta name="theme-color" content="#4a5f56">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon.svg">
+<title>CoSplit</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f7f6;
+    --surface: #ffffff;
+    --surface2: #eef1ef;
+    --border: #d8e0db;
+    --text: #161c19;
+    --text-muted: #5f6d66;
+    --accent: #4a5f56;
+    --accent-dark: #354540;
+    --accent-light: #e2eae5;
+    --accent-text: #2a3b33;
+    --danger: #c1392b;
+    --danger-light: #fdecea;
+    --danger-text: #7b1d14;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* HEADER */
+  .app-header {
+    background: var(--accent);
+    padding: calc(48px + env(safe-area-inset-top, 0px)) clamp(14px, 4vw, 20px) 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .app-header h1 {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .app-header .subtitle {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.75);
+    margin-top: 2px;
+  }
+
+  .header-badge {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  /* SCROLL CONTAINER */
+  .scroll-area {
+    padding: clamp(12px, 3vw, 16px) clamp(12px, 4vw, 18px) calc(28px + var(--safe-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 2.5vw, 14px);
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: clamp(12px, 3.5vw, 16px);
+  }
+
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.6rem;
+    margin-right: 7px;
+  }
+
+  /* INPUTS */
+  input[type="text"], input[type="number"], select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: max(16px, 0.95rem); /* min 16px prevents iOS zoom */
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: clamp(9px, 2.5vw, 11px) clamp(10px, 3vw, 13px);
+    color: var(--text);
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  input[type="number"] { font-family: 'DM Mono', monospace; }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7060' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:active { opacity: 0.75; }
+
+  .btn-add {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: 1px dashed var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    cursor: pointer;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-add:active { opacity: 0.7; }
+
+  .btn-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-icon:active { background: var(--danger-light); color: var(--danger); }
+
+  /* PEOPLE */
+  .people-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .person-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 10px 5px 5px;
+    font-size: 0.85rem;
+  }
+
+  .chip-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: 0.68rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .chip-remove {
+    background: none; border: none;
+    color: var(--text-muted);
+    font-size: 1rem; line-height: 1;
+    padding: 0; margin-left: 2px;
+    cursor: pointer;
+    min-width: 20px; min-height: 20px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .add-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .add-row input[type="text"] {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+  .add-row .btn-primary {
+    flex: 0 0 auto;
+  }
+
+  /* EXPENSES */
+  .expense-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .expense-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(5.75rem, 32%) 40px;
+    gap: clamp(6px, 2vw, 10px);
+    align-items: center;
+  }
+  .expense-row > select,
+  .expense-row > input[type="number"] {
+    min-width: 0;
+  }
+
+  @media (max-width: 420px) {
+    .expense-row {
+      grid-template-columns: 1fr 40px;
+      grid-template-areas:
+        "payer payer"
+        "amount remove";
+    }
+    .expense-row > select { grid-area: payer; }
+    .expense-row > input[type="number"] { grid-area: amount; }
+    .expense-row > .btn-icon { grid-area: remove; }
+  }
+
+  @media (max-width: 360px) {
+    .add-row .btn-primary {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+  }
+
+  /* RESULTS */
+  .results-card {
+    background: var(--surface);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: none;
+  }
+  .results-card.visible { display: block; }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(6px, 2vw, 10px);
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 320px) {
+    .metrics {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .metric-box {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: clamp(8px, 2vw, 10px) 6px;
+    text-align: center;
+    min-width: 0;
+  }
+  .metric-box .lbl {
+    font-size: clamp(0.55rem, 2.8vw, 0.62rem);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'DM Mono', monospace;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .metric-box .val {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+    font-weight: 500;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  .results-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .payment-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .payment-item:last-child { border-bottom: none; }
+
+  .p-avatar {
+    width: clamp(32px, 9vw, 38px);
+    height: clamp(32px, 9vw, 38px);
+    border-radius: 50%;
+    font-size: 0.75rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+  .to-avatar {
+    width: clamp(26px, 7vw, 30px);
+    height: clamp(26px, 7vw, 30px);
+    border-radius: 50%;
+    font-size: 0.65rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .p-name { font-size: clamp(0.85rem, 3.5vw, 0.95rem); font-weight: 500; flex: 1 1 6rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p-arrow { font-size: 0.8rem; color: var(--text-muted); flex-shrink: 0; }
+  .p-amount { font-family: 'DM Mono', monospace; font-size: clamp(0.85rem, 3.5vw, 0.95rem); font-weight: 500; flex-shrink: 0; }
+  .p-to { font-size: 0.8rem; color: var(--text-muted); flex-shrink: 0; }
+  .p-to-name { font-size: clamp(0.85rem, 3.5vw, 0.95rem); font-weight: 500; flex: 1 1 4rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .tx-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
+  .empty-state { font-size: 0.85rem; color: var(--text-muted); padding: 4px 0; }
+
+  .error-banner {
+    background: var(--danger-light);
+    color: var(--danger-text);
+    border: 1px solid #f5c6c2;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 0.83rem;
+    display: none;
+    margin-top: 10px;
+  }
+  .error-banner.visible { display: block; }
+
+  /* MODE TOGGLE */
+  .mode-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    border-radius: calc(var(--radius-sm) - 2px);
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .mode-btn.active {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* PWA install hint */
+  .install-hint {
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: var(--accent-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .install-hint button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <h1>CoSplit</h1>
+    <div class="subtitle" data-i18n="subtitle"></div>
+  </div>
+  <div class="header-badge" id="header-badge"></div>
+</div>
+
+<div class="scroll-area">
+
+  <div class="install-hint" id="install-hint" style="display:none">
+    <span data-i18n="installHint"></span>
+    <button type="button" onclick="document.getElementById('install-hint').style.display='none'">×</button>
+  </div>
+
+  <!-- STEP 1: PERSONE -->
+  <div class="card">
+    <div class="card-title">
+      <span><span class="step-badge">1</span><span data-i18n="peopleGroup"></span></span>
+    </div>
+    <div class="people-wrap" id="people-wrap"></div>
+    <div class="add-row">
+      <input type="text" id="new-person" onkeydown="if(event.key==='Enter'){addPerson()}" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" />
+      <button type="button" class="btn-primary" data-i18n="addPerson" onclick="addPerson()"></button>
+    </div>
+  </div>
+
+  <!-- STEP 2: SPESE -->
+  <div class="card">
+    <div class="card-title">
+      <span><span class="step-badge">2</span><span data-i18n="expenses"></span></span>
+    </div>
+    <div class="expense-list" id="expense-list"></div>
+    <button type="button" class="btn-add" data-i18n="addExpenseBtn" onclick="addExpense()"></button>
+    <div class="error-banner" id="error-banner"></div>
+  </div>
+
+  <!-- RISULTATI LIVE -->
+  <div class="results-card" id="results-card">
+    <div class="metrics" id="metrics"></div>
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+      <div class="results-title" data-i18n="resultsTitle"></div>
+      <div style="display: flex; background: var(--surface2); border-radius: var(--radius-sm); padding: 2px;">
+        <button type="button" id="mode-minimal" class="mode-btn active" data-i18n="modeMinimal" onclick="setReimbursementMode('minimal')"></button>
+        <button type="button" id="mode-classic" class="mode-btn" data-i18n="modeClassic" onclick="setReimbursementMode('classic')"></button>
+      </div>
+    </div>
+    <div id="payments-list"></div>
+    <div class="tx-note" id="tx-note"></div>
+  </div>
+
+</div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+
+  const TRANSLATIONS = {
+    en: {
+      subtitle: 'Split expenses with friends',
+      installHint: 'Add to Home screen to use offline like an app!',
+      peopleGroup: 'people in the group',
+      expenses: 'expenses',
+      addPerson: 'Add',
+      addExpenseBtn: '+ add expense',
+      namePlaceholder: 'Name…',
+      amountHint: 'Amount ({sym})',
+      errorNeedPerson: 'Add at least one person first.',
+      metricTotal: 'Total',
+      metricPeople: 'People',
+      metricShare: 'Share',
+      resultsTitle: 'minimal reimbursements',
+      modeMinimal: 'Minimal',
+      modeClassic: 'Classic',
+      allSettled: 'All settled — no reimbursements.',
+      toWord: 'to',
+      badgeOne: '{n} person',
+      badgeMany: '{n} people',
+      txOne: '{n} payment total',
+      txMany: '{n} payments total',
+    },
+    it: {
+      subtitle: 'dividi le spese tra amici',
+      installHint: 'Aggiungi alla schermata Home per usarla offline come un’app!',
+      peopleGroup: 'persone del gruppo',
+      expenses: 'spese',
+      addPerson: 'Aggiungi',
+      addExpenseBtn: '+ aggiungi spesa',
+      namePlaceholder: 'Nome…',
+      amountHint: 'Importo ({sym})',
+      errorNeedPerson: 'Aggiungi prima almeno una persona.',
+      metricTotal: 'Totale',
+      metricPeople: 'Persone',
+      metricShare: 'Quota',
+      resultsTitle: 'rimborsi minimi',
+      modeMinimal: 'Minimo',
+      modeClassic: 'Classico',
+      allSettled: 'Tutti pari — nessun rimborso.',
+      toWord: 'a',
+      badgeOne: '{n} persona',
+      badgeMany: '{n} persone',
+      txOne: '{n} pagamento totale',
+      txMany: '{n} pagamenti totali',
+    },
+    fr: {
+      subtitle: 'Partagez les dépenses entre amis',
+      installHint: 'Ajoutez à l’écran d’accueil pour une utilisation hors ligne !',
+      peopleGroup: 'personnes du groupe',
+      expenses: 'dépenses',
+      addPerson: 'Ajouter',
+      addExpenseBtn: '+ ajouter une dépense',
+      namePlaceholder: 'Nom…',
+      amountHint: 'Montant ({sym})',
+      errorNeedPerson: 'Ajoutez au moins une personne.',
+      metricTotal: 'Total',
+      metricPeople: 'Personnes',
+      metricShare: 'Part',
+      resultsTitle: 'remboursements minimaux',
+      modeMinimal: 'Minimal',
+      modeClassic: 'Classique',
+      allSettled: 'Tout est carré — aucun remboursement.',
+      toWord: 'à',
+      badgeOne: '{n} personne',
+      badgeMany: '{n} personnes',
+      txOne: '{n} paiement au total',
+      txMany: '{n} paiements au total',
+    },
+    de: {
+      subtitle: 'Ausgaben mit Freunden teilen',
+      installHint: 'Zum Startbildschirm hinzufügen — offline wie eine App nutzen!',
+      peopleGroup: 'Personen in der Gruppe',
+      expenses: 'Ausgaben',
+      addPerson: 'Hinzufügen',
+      addExpenseBtn: '+ Ausgabe hinzufügen',
+      namePlaceholder: 'Name…',
+      amountHint: 'Betrag ({sym})',
+      errorNeedPerson: 'Bitte zuerst mindestens eine Person hinzufügen.',
+      metricTotal: 'Summe',
+      metricPeople: 'Personen',
+      metricShare: 'Anteil',
+      resultsTitle: 'minimale Rückerstattungen',
+      modeMinimal: 'Minimal',
+      modeClassic: 'Klassisch',
+      allSettled: 'Alles ausgeglichen — keine Rückerstattungen.',
+      toWord: 'an',
+      badgeOne: '{n} Person',
+      badgeMany: '{n} Personen',
+      txOne: '{n} Zahlung gesamt',
+      txMany: '{n} Zahlungen gesamt',
+    },
+    es: {
+      subtitle: 'Divide gastos con amigos',
+      installHint: 'Añade a la pantalla de inicio para usarla sin conexión.',
+      peopleGroup: 'personas del grupo',
+      expenses: 'gastos',
+      addPerson: 'Añadir',
+      addExpenseBtn: '+ añadir gasto',
+      namePlaceholder: 'Nombre…',
+      amountHint: 'Importe ({sym})',
+      errorNeedPerson: 'Añade al menos una persona primero.',
+      metricTotal: 'Total',
+      metricPeople: 'Personas',
+      metricShare: 'Cuota',
+      resultsTitle: 'reembolsos mínimos',
+      modeMinimal: 'Mínimo',
+      modeClassic: 'Clásico',
+      allSettled: 'Todo cuadrado — sin reembolsos.',
+      toWord: 'a',
+      badgeOne: '{n} persona',
+      badgeMany: '{n} personas',
+      txOne: '{n} pago en total',
+      txMany: '{n} pagos en total',
+    },
+    pt: {
+      subtitle: 'Divida despesas com amigos',
+      installHint: 'Adicione à tela inicial para usar offline como um app.',
+      peopleGroup: 'pessoas do grupo',
+      expenses: 'despesas',
+      addPerson: 'Adicionar',
+      addExpenseBtn: '+ adicionar despesa',
+      namePlaceholder: 'Nome…',
+      amountHint: 'Valor ({sym})',
+      errorNeedPerson: 'Adicione pelo menos uma pessoa primeiro.',
+      metricTotal: 'Total',
+      metricPeople: 'Pessoas',
+      metricShare: 'Quota',
+      resultsTitle: 'reembolsos mínimos',
+      modeMinimal: 'Mínimo',
+      modeClassic: 'Clássico',
+      allSettled: 'Tudo certo — sem reembolsos.',
+      toWord: 'a',
+      badgeOne: '{n} pessoa',
+      badgeMany: '{n} pessoas',
+      txOne: '{n} pagamento no total',
+      txMany: '{n} pagamentos no total',
+    },
+  };
+
+  const localeCandidates = (navigator.languages && navigator.languages.length)
+    ? navigator.languages
+    : [navigator.language || 'en'];
+  const fmtLocale = String(localeCandidates[0] || navigator.language || 'en').replace(/_/g, '-');
+
+  let appLangBase = 'en';
+  let uiLocale = 'en';
+  for (const raw of localeCandidates) {
+    const tag = String(raw).replace(/_/g, '-');
+    const base = tag.split('-')[0].toLowerCase();
+    if (TRANSLATIONS[base]) {
+      appLangBase = base;
+      uiLocale = tag;
+      break;
+    }
+  }
+
+  const L = TRANSLATIONS[appLangBase] || TRANSLATIONS.en;
+
+  function defaultCurrencyForLocale(locale) {
+    try {
+      let region = '';
+      if (typeof Intl !== 'undefined' && Intl.Locale) {
+        region = new Intl.Locale(locale).maximize().region || '';
+      } else {
+        const seg = String(locale).replace(/_/g, '-').split('-');
+        if (seg.length >= 2) region = seg[seg.length - 1].toUpperCase();
+      }
+      const byRegion = {
+        US: 'USD', GB: 'GBP', JP: 'JPY', CH: 'CHF', IN: 'INR', CA: 'CAD',
+        AU: 'AUD', BR: 'BRL', CN: 'CNY', KR: 'KRW', MX: 'MXN', SE: 'SEK',
+        NO: 'NOK', DK: 'DKK', PL: 'PLN', CZ: 'CZK', HU: 'HUF', TR: 'TRY',
+      };
+      if (byRegion[region]) return byRegion[region];
+      if (['AT', 'BE', 'DE', 'ES', 'FI', 'FR', 'GR', 'IE', 'IT', 'NL', 'PT'].includes(region)) return 'EUR';
+    } catch (e) { /* ignore */ }
+    const lang = (locale || 'en').split('-')[0].toLowerCase();
+    if (['it', 'de', 'fr', 'es', 'nl', 'pt', 'el', 'fi', 'sk'].includes(lang)) return 'EUR';
+    if (lang === 'ja') return 'JPY';
+    if (lang === 'zh') return 'CNY';
+    return 'EUR';
+  }
+
+  const appCurrency = defaultCurrencyForLocale(fmtLocale);
+  const moneyFmt = new Intl.NumberFormat(fmtLocale, {
+    style: 'currency',
+    currency: appCurrency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  function T(str, vars) {
+    if (!str) return '';
+    return str.replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] !== undefined) ? vars[k] : '');
+  }
+
+  function formatMoney(amount) {
+    return moneyFmt.format(amount);
+  }
+
+  function currencySymbol() {
+    try {
+      const parts = moneyFmt.formatToParts(0);
+      const c = parts.find(p => p.type === 'currency');
+      return c ? c.value : appCurrency;
+    } catch (e) {
+      return appCurrency;
+    }
+  }
+
+  function amountPlaceholder() {
+    return T(L.amountHint, { sym: currencySymbol() });
+  }
+
+  function peopleBadgeText(n) {
+    return n === 1 ? T(L.badgeOne, { n: String(n) }) : T(L.badgeMany, { n: String(n) });
+  }
+
+  function txNoteText(n) {
+    return n === 1 ? T(L.txOne, { n: String(n) }) : T(L.txMany, { n: String(n) });
+  }
+
+  function escapeAttr(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;');
+  }
+
+  let people = [];
+  let expenses = [];
+  let colorCounter = 0;
+  let reimbursementMode = 'minimal'; // 'minimal' or 'classic'
+
+  function applyI18n() {
+    document.documentElement.lang = uiLocale;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (key && L[key]) el.textContent = L[key];
+    });
+    const np = document.getElementById('new-person');
+    if (np) np.setAttribute('placeholder', L.namePlaceholder);
+    document.getElementById('header-badge').textContent = peopleBadgeText(people.length);
+  }
+
+  applyI18n();
+
+  if (window.navigator.standalone !== true) {
+    document.getElementById('install-hint').style.display = 'flex';
+  }
+
+  const COLORS = [
+    ['#e2eae5','#2a3b33'], ['#d8f3dc','#1b4332'], ['#e8f4fd','#0a3d62'],
+    ['#f3e5f5','#4a148c'], ['#ede8e3','#4a4038'], ['#e0f7fa','#004d40'],
+    ['#fce4ec','#6a1128'], ['#f1f8e9','#1b5e20'], ['#e3f2fd','#0d47a1'],
+    ['#fef9ec','#7a4f00'], ['#fdecea','#7b1d14'], ['#ede7f6','#311b92'],
+    ['#fbe9e7','#5d1a14'], ['#f9fbe7','#33691e'], ['#e8eaf6','#1a237e'],
+  ];
+
+  function getColor(idx) { return COLORS[idx % COLORS.length]; }
+  function initials(name) {
+    const p = name.trim().split(' ');
+    return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : name.slice(0,2).toUpperCase();
+  }
+
+  function setReimbursementMode(mode) {
+    reimbursementMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('mode-' + mode).classList.add('active');
+    recalculate();
+  }
+
+  function calculateClassicReimbursements(balances, quota) {
+    const transactions = [];
+    
+    // In classic mode, everyone who paid less than the quota pays to everyone who paid more
+    const creditors = balances.filter(b => b.balance > 0.005);
+    const debtors = balances.filter(b => b.balance < -0.005);
+    
+    if (creditors.length === 0 || debtors.length === 0) {
+      return transactions;
+    }
+    
+    // Each debtor pays their deficit amount, split proportionally among creditors
+    debtors.forEach(debtor => {
+      const deficit = -debtor.balance;
+      const totalCreditorsOwed = creditors.reduce((sum, creditor) => sum + creditor.balance, 0);
+      
+      creditors.forEach(creditor => {
+        const proportion = creditor.balance / totalCreditorsOwed;
+        const amount = deficit * proportion;
+        if (amount > 0.005) {
+          transactions.push({
+            from: debtor,
+            to: creditor,
+            amount: amount
+          });
+        }
+      });
+    });
+    
+    return transactions;
+  }
+
+  function calculateMinimalReimbursements(balances) {
+    const creditors = balances.filter(b => b.balance > 0.005).map(b => ({...b}));
+    const debtors  = balances.filter(b => b.balance < -0.005).map(b => ({...b}));
+    creditors.sort((a,b) => b.balance-a.balance);
+    debtors.sort((a,b) => a.balance-b.balance);
+
+    const transactions = [];
+    let ci=0, di=0;
+    while (ci<creditors.length && di<debtors.length) {
+      const amount = Math.min(creditors[ci].balance, -debtors[di].balance);
+      transactions.push({ from: debtors[di], to: creditors[ci], amount });
+      creditors[ci].balance -= amount;
+      debtors[di].balance += amount;
+      if (Math.abs(creditors[ci].balance) < 0.005) ci++;
+      if (Math.abs(debtors[di].balance) < 0.005) di++;
+    }
+    return transactions;
+  }
+
+  function addPerson() {
+    const input = document.getElementById('new-person');
+    const name = input.value.trim();
+    if (!name) return;
+    if (people.find(p => p.name.toLowerCase() === name.toLowerCase())) { input.value=''; return; }
+    people.push({ name, colorIdx: colorCounter++ });
+    input.value = '';
+    renderPeople();
+    renderExpenses();
+    recalculate();
+    input.focus();
+  }
+
+  function removePerson(idx) {
+    expenses = expenses.filter(e => e.personIdx !== idx);
+    expenses = expenses.map(e => ({ ...e, personIdx: e.personIdx > idx ? e.personIdx-1 : e.personIdx }));
+    people.splice(idx, 1);
+    renderPeople();
+    renderExpenses();
+    recalculate();
+  }
+
+  function renderPeople() {
+    const wrap = document.getElementById('people-wrap');
+    wrap.innerHTML = '';
+    people.forEach((p, i) => {
+      const [bg, fg] = getColor(p.colorIdx);
+      const chip = document.createElement('div');
+      chip.className = 'person-chip';
+      chip.innerHTML = `
+        <div class="chip-avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
+        <span>${p.name}</span>
+        <button type="button" class="chip-remove" onclick="removePerson(${i})">×</button>
+      `;
+      wrap.appendChild(chip);
+    });
+    document.getElementById('header-badge').textContent = peopleBadgeText(people.length);
+  }
+
+  function addExpense() {
+    if (people.length === 0) { showError(L.errorNeedPerson); return; }
+    expenses.push({ personIdx: 0, amount: '' });
+    renderExpenses();
+    recalculate();
+  }
+
+  function removeExpense(idx) {
+    expenses.splice(idx, 1);
+    renderExpenses();
+    recalculate();
+  }
+
+  function renderExpenses() {
+    const list = document.getElementById('expense-list');
+    list.innerHTML = '';
+    expenses.forEach((e, i) => {
+      const row = document.createElement('div');
+      row.className = 'expense-row';
+      const opts = people.map((p, pi) =>
+        `<option value="${pi}" ${pi===e.personIdx?'selected':''}>${p.name}</option>`
+      ).join('');
+      const ph = escapeAttr(amountPlaceholder());
+      row.innerHTML = `
+        <select onchange="expenses[${i}].personIdx=parseInt(this.value);recalculate()">${opts}</select>
+        <input type="number" inputmode="decimal" placeholder="${ph}" value="${e.amount}" min="0" step="0.01"
+          oninput="expenses[${i}].amount=this.value;recalculate()" />
+        <button type="button" class="btn-icon" onclick="removeExpense(${i})">×</button>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function recalculate() {
+    hideError();
+    const card = document.getElementById('results-card');
+    if (people.length < 2) { card.classList.remove('visible'); return; }
+    const validExp = expenses.filter(e => parseFloat(e.amount) > 0);
+    if (validExp.length === 0) { card.classList.remove('visible'); return; }
+
+    const total = validExp.reduce((s,e) => s+parseFloat(e.amount), 0);
+    const n = people.length;
+    const quota = total / n;
+
+    const balances = people.map((p, i) => {
+      const paid = validExp.filter(e => e.personIdx===i).reduce((s,e) => s+parseFloat(e.amount), 0);
+      return { name: p.name, colorIdx: p.colorIdx, balance: paid-quota };
+    });
+
+    // Use the selected reimbursement algorithm
+    const transactions = reimbursementMode === 'classic' 
+      ? calculateClassicReimbursements(balances, quota)
+      : calculateMinimalReimbursements(balances);
+
+    document.getElementById('metrics').innerHTML = `
+      <div class="metric-box"><span class="lbl">${L.metricTotal}</span><span class="val">${formatMoney(total)}</span></div>
+      <div class="metric-box"><span class="lbl">${L.metricPeople}</span><span class="val">${n}</span></div>
+      <div class="metric-box"><span class="lbl">${L.metricShare}</span><span class="val">${formatMoney(quota)}</span></div>
+    `;
+
+    const listEl = document.getElementById('payments-list');
+    listEl.innerHTML = '';
+    if (transactions.length === 0) {
+      listEl.innerHTML = `<p class="empty-state">${L.allSettled}</p>`;
+    } else {
+      transactions.forEach(t => {
+        const [fromBg, fromFg] = getColor(t.from.colorIdx);
+        const [toBg, toFg]     = getColor(t.to.colorIdx);
+        const item = document.createElement('div');
+        item.className = 'payment-item';
+        item.innerHTML = `
+          <div class="p-avatar" style="background:${fromBg};color:${fromFg}">${initials(t.from.name)}</div>
+          <span class="p-name">${t.from.name}</span>
+          <span class="p-arrow">→</span>
+          <span class="p-amount">${formatMoney(t.amount)}</span>
+          <span class="p-to">${L.toWord}</span>
+          <div class="to-avatar" style="background:${toBg};color:${toFg}">${initials(t.to.name)}</div>
+          <span class="p-to-name">${t.to.name}</span>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    document.getElementById('tx-note').textContent =
+      transactions.length > 0 ? txNoteText(transactions.length) : '';
+
+    card.classList.add('visible');
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-banner');
+    el.textContent = msg; el.classList.add('visible');
+  }
+  function hideError() {
+    document.getElementById('error-banner').classList.remove('visible');
+  }
+</script>
+</body>
+</html>
