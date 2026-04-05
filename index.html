@@ -350,10 +350,9 @@
   }
 
   .payment-item {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto auto 1fr;
     align-items: center;
-    justify-content: space-between;
     gap: 6px 8px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
@@ -936,17 +935,13 @@
         const item = document.createElement('div');
         item.className = 'payment-item';
         item.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 6px 8px;">
-            <div class="p-avatar" style="background:${fromBg};color:${fromFg}">${initials(t.from.name)}</div>
-            <span class="p-name">${t.from.name}</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px 8px;">
-            <span class="p-arrow">→</span>
-            <span class="p-amount">${formatMoney(t.amount)}</span>
-            <span class="p-to">${L.toWord}</span>
-            <div class="to-avatar" style="background:${toBg};color:${toFg}">${initials(t.to.name)}</div>
-            <span class="p-to-name">${t.to.name}</span>
-          </div>
+          <div class="p-avatar" style="background:${fromBg};color:${fromFg}">${initials(t.from.name)}</div>
+          <span class="p-name">${t.from.name}</span>
+          <span class="p-arrow">→</span>
+          <span class="p-amount">${formatMoney(t.amount)}</span>
+          <span class="p-to">${L.toWord}</span>
+          <div class="to-avatar" style="background:${toBg};color:${toFg}">${initials(t.to.name)}</div>
+          <span class="p-to-name">${t.to.name}</span>
         `;
         listEl.appendChild(item);
       });
